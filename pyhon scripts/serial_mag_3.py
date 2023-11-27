@@ -13,7 +13,10 @@ def read_serial_port(port='COM3', baud_rate=9600):
 
         def update_plot(frame):
             while ser.in_waiting > 0:
-                line = ser.readline().decode('utf-8').strip()
+                try:
+                    line = ser.readline().decode('utf-8').strip()
+                except:
+                    print('not utf-8')
 
             # Use regular expression to extract X and Y coordinates
             match = re.match(r'X([+\-]\d+)Y([+\-]\d+)', line)
@@ -23,13 +26,16 @@ def read_serial_port(port='COM3', baud_rate=9600):
                 y = int(match.group(2))
 
                 # Append the current vector to the list
+
+                if len(vectors)>10:
+                    vectors.pop(0)
                 vectors.append((x, y))
 
                 ax.clear()  # Clear the previous plot
 
                 # Plot all vectors in the list as dots
                 for vec in vectors:
-                    ax.scatter(vec[0], vec[1], color='red')
+                    ax.scatter(vec[0], vec[1], color='red', marker='.')
 
                 # Plot the current vector as a blue arrow
                 ax.quiver(0, 0, x, y, angles='xy', scale_units='xy', scale=1, color='blue')
@@ -42,7 +48,7 @@ def read_serial_port(port='COM3', baud_rate=9600):
                 ax.grid(True)
                 plt.draw()
 
-        ani = FuncAnimation(fig, update_plot, interval=100)
+        ani = FuncAnimation(fig, update_plot, interval=60)
 
         plt.show()
 
@@ -50,4 +56,5 @@ def read_serial_port(port='COM3', baud_rate=9600):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    read_serial_port()
+    #read_serial_port()
+    read_serial_port('COM4')
